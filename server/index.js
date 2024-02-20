@@ -18,7 +18,7 @@ app.post('/api/animals', (req, res) => {
   const newAnimal = req.body;
 
   if (animals.some(animal => animal.name === newAnimal.name)) {
-    return res.status(400).json({ error: 'Animal with this name already exists' });
+    return res.status(400).json({ error: 'Animal with this name already exists.' });
   }
 
   animals.push(newAnimal);
