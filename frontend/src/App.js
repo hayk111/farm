@@ -7,11 +7,14 @@ import api from './api';
 const validationSchema = object({
   newAnimalName: string()
     .required('Animal name is required')
-    .matches(/^[a-zA-Z]+$/, 'Invalid animal name. Must contain only characters.')
+    .matches(
+      /^[a-zA-Z]+$/,
+      'Invalid animal name. Must contain only characters.'
+    ),
 });
 
 const App = () => {
-  const { register, handleSubmit, reset, formState: { errors, isValid } } = useForm({
+  const { register, handleSubmit, reset, formState, watch } = useForm({
     resolver: async (data) => {
       try {
         await validationSchema.validate(data, { abortEarly: false });
@@ -31,9 +34,15 @@ const App = () => {
   const [animals, setAnimals] = useState([]);
   const [animalsFetched, setAnimalsFetched] = useState(false);
 
+  const newAnimalName = watch('newAnimalName');
+  const isAnimalExist = animals.some(
+    (animal) => animal.name?.toLowerCase() === newAnimalName?.toLowerCase()
+  );
+
   useEffect(() => {
-    api.getAllAnimals()
-      .then(data => setAnimals(data))
+    api
+      .getAllAnimals()
+      .then((data) => setAnimals(data))
       .finally(() => setAnimalsFetched(true));
   }, []);
 
@@ -78,15 +87,23 @@ const App = () => {
               <button
                 type="submit"
                 className={clsx('ml-2 bg-blue-500 text-white p-2', {
-                  'disabled cursor-not-allowed opacity-50 focus:outline-none': !isValid
+                  'disabled cursor-not-allowed opacity-50 focus:outline-none':
+                    !formState.isValid || isAnimalExist,
                 })}
-                disabled={!isValid}
+                disabled={!formState.isValid || isAnimalExist}
               >
                 Add Animal
               </button>
             </div>
-            {errors.newAnimalName && (
-              <p className="text-sm text-red-500">{errors.newAnimalName}</p>
+            {formState.errors.newAnimalName && (
+              <p className="text-sm text-red-500">
+                {formState.errors.newAnimalName}
+              </p>
+            )}
+            {isAnimalExist && (
+              <p className="text-sm text-red-500">
+                {newAnimalName?.toLowerCase()} already exists
+              </p>
             )}
           </form>
         </div>
@@ -94,18 +111,30 @@ const App = () => {
         <div className="w-1/2 mt-10">
           {!animalsFetched ? (
             <div className="flex justify-center w-full">
-              <p className="text-gray-500 text-center animate-spin h-5 w-5">&#9696;</p>
+              <p className="text-gray-500 text-center animate-spin h-5 w-5">
+                &#9696;
+              </p>
             </div>
           ) : (
             <>
               {animals?.length === 0 && (
-                <h2 className="text-gray-500 text-xl text-center">No animals added yet.</h2>
+                <h2 className="text-gray-500 text-xl text-center">
+                  No animals added yet.
+                </h2>
               )}
               <ul>
-                {animals?.map(animal => (
-                  <li key={animal.name} className="flex items-center justify-between border-b py-2">
+                {animals?.map((animal) => (
+                  <li
+                    key={animal.name}
+                    className="flex items-center justify-between border-b py-2"
+                  >
                     <span>{animal.name}</span>
-                    <button onClick={() => removeAnimal(animal.name)} className="text-red-500">Remove</button>
+                    <button
+                      onClick={() => removeAnimal(animal.name)}
+                      className="text-red-500"
+                    >
+                      Remove
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -115,7 +144,6 @@ const App = () => {
       </div>
     </div>
   );
-  
-}
+};
 
 export default App;
