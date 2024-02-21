@@ -7,10 +7,7 @@ import api from './api';
 const validationSchema = object({
   newAnimalName: string()
     .required('Animal name is required')
-    .matches(
-      /^[a-zA-Z]+$/,
-      'Invalid animal name. Must contain only characters.'
-    ),
+    .matches(/^[a-zA-Z]+$/, 'Animal name must contain only characters.'),
 });
 
 const App = () => {
