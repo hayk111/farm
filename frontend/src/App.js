@@ -35,7 +35,7 @@ const App = () => {
   const [animalsFetched, setAnimalsFetched] = useState(false);
 
   const newAnimalName = watch('newAnimalName');
-  const isAnimalExist = animals.some(
+  const isAnimalExist = animals?.some(
     (animal) => animal.name?.toLowerCase() === newAnimalName?.toLowerCase()
   );
 
